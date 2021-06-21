@@ -2,7 +2,7 @@
 
 namespace GPU_Prices_Parser.Parsers.Products
 {
-    internal class KotophotoProductParser : IProductParser
+    internal class KotofotoProductParser : IProductParser
     {
         public Gpu ParseInfo(string url)
         {
