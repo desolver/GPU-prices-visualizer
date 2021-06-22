@@ -1,14 +1,16 @@
 namespace GPU_Prices_Parser.Data
 {
-    internal class Store : IData
+    internal class Store
     {
-        public string Name { get; }
+        public StoreName Name { get; }
         public string[] Urls { get; }
         
-        public Store(string name, string[] urls)
+        public Store(StoreName name, string[] urls)
         {
             Name = name;
             Urls = urls;
         }
+
+        public override string ToString() => Name.ToString();
     }
 }

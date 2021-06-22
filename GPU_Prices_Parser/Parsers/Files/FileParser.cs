@@ -1,24 +1,23 @@
-using System;
 using System.IO;
 using GPU_Prices_Parser.Data;
+using GPU_Prices_Parser.Graph;
 using Newtonsoft.Json;
 
 namespace GPU_Prices_Parser.Parsers.Files
 {
     internal static class FileParser
     {
-        public static Gpu ParseGpuFile(string path)
-        {
-            throw new NotImplementedException();
-        }
+        public static GpuNote ParseGpuFile(string path) => Parse<GpuNote>(path);
 
-        public static Store ParseStoreFile(string path)
+        public static Store ParseStoreFile(string path) => Parse<Store>(path);
+
+        private static T Parse<T>(string path)
         {
             if (!File.Exists(path))
-                throw new IOException($"Store file {path} doesn't exist");
+                throw new IOException($"File {path} doesn't exist");
 
             var fileContent = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<Store>(fileContent);
+            return JsonConvert.DeserializeObject<T>(fileContent);
         }
     }
 }

@@ -1,16 +1,18 @@
 ﻿namespace GPU_Prices_Parser.Data
 {
-    internal class Gpu : IData
+    internal class Gpu
     {
-        public string Name { get; }
+        public GpuModel Model;
+        public string FullName { get; }
         public decimal Price { get; }
-        public Store CellingStore { get; }
+        public StoreName CellingStore { get; }
         
-        public Gpu(string name, decimal price, Store cellingStore)
+        public Gpu(GpuModel model, string fullName, decimal price, StoreName cellingStore)
         {
-            Name = name;
+            FullName = fullName;
             Price = price;
             CellingStore = cellingStore;
+            Model = model;
         }
     }
 }
