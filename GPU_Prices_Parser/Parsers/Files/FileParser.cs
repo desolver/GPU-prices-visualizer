@@ -1,6 +1,6 @@
 using System.IO;
 using GPU_Prices_Parser.Data;
-using GPU_Prices_Parser.Graph;
+using GPU_Prices_Parser.Data.Gpu;
 using Newtonsoft.Json;
 
 namespace GPU_Prices_Parser.Parsers.Files

@@ -1,4 +1,4 @@
-﻿namespace GPU_Prices_Parser.Data
+﻿namespace GPU_Prices_Parser.Data.Gpu
 {
     internal class Gpu
     {
