@@ -33,9 +33,9 @@ namespace GPU_Prices_Parser
             this.plotView = new OxyPlot.WindowsForms.PlotView();
             this.sendRequestBtn = new System.Windows.Forms.Button();
             this.gpuGroupBox = new System.Windows.Forms.GroupBox();
+            this.gpuList = new System.Windows.Forms.ComboBox();
             this.storesGroupBox = new System.Windows.Forms.GroupBox();
             this.pricesTable = new System.Windows.Forms.DataGridView();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.gpuGroupBox.SuspendLayout();
             this.storesGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pricesTable)).BeginInit();
@@ -75,7 +75,7 @@ namespace GPU_Prices_Parser
             // 
             // gpuGroupBox
             // 
-            this.gpuGroupBox.Controls.Add(this.comboBox1);
+            this.gpuGroupBox.Controls.Add(this.gpuList);
             this.gpuGroupBox.Controls.Add(this.sendRequestBtn);
             this.gpuGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.gpuGroupBox.Location = new System.Drawing.Point(806, 12);
@@ -84,6 +84,15 @@ namespace GPU_Prices_Parser
             this.gpuGroupBox.TabIndex = 5;
             this.gpuGroupBox.TabStop = false;
             this.gpuGroupBox.Text = "GPU Model";
+            // 
+            // gpuList
+            // 
+            this.gpuList.FormattingEnabled = true;
+            this.gpuList.Location = new System.Drawing.Point(5, 24);
+            this.gpuList.Name = "gpuList";
+            this.gpuList.Size = new System.Drawing.Size(194, 25);
+            this.gpuList.TabIndex = 4;
+            this.gpuList.Text = "Select GPU model";
             // 
             // storesGroupBox
             // 
@@ -112,14 +121,6 @@ namespace GPU_Prices_Parser
             this.pricesTable.TabIndex = 8;
             this.pricesTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.PricesTable_CellClick);
             // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(5, 24);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(194, 25);
-            this.comboBox1.TabIndex = 4;
-            // 
             // GpuForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -146,7 +147,7 @@ namespace GPU_Prices_Parser
         private System.Windows.Forms.GroupBox storesGroupBox;
         private System.Windows.Forms.ListBox storeList;
         private System.Windows.Forms.DataGridView pricesTable;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox gpuList;
     }
 }
 

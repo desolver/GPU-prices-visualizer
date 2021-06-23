@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AngleSharp.Dom;
 using GPU_Prices_Parser.Data;
+using GPU_Prices_Parser.Extensions;
 using GPU_Prices_Parser.Parsers.Products;
 using OxyPlot;
 using OxyPlot.Series;
@@ -21,7 +22,7 @@ namespace GPU_Prices_Parser
         
         public GpuForm() { }
 
-        public GpuForm(Store[] storesToSearch, IEnumerable<IProductParser> productParsers, Filter filter)
+        public GpuForm(GpuModel[] gpuModelToSearch, Store[] storesToSearch, IEnumerable<IProductParser> productParsers, Filter filter)
         {
             InitializeComponent();
             
@@ -46,10 +47,22 @@ namespace GPU_Prices_Parser
             foreach (var store in _storesToSearch) 
                 storeList.Items.Add(store.ToString()!);
 
-            _webProvider.DownloadCompleted += OnDownloadComplete;
+            //_webProvider.DownloadCompleted += OnDownloadComplete;
 
             
             ConfigureDataGridView();
+            ConfigureComboBox(gpuModelToSearch.Select(model => model.ToString()).ToArray());
+        }
+
+        private void ConfigureComboBox(string[] gpuToSearch)
+        {
+            gpuList.DropDownStyle = ComboBoxStyle.DropDownList;
+            gpuList.Text = "Select GPU model";
+            gpuList.Items.AddRange(gpuToSearch.Select(model =>
+            {
+                model = model.Replace('_', ' ');
+                return (object) model.ToUpperInvariant();
+            }).ToArray());
         }
 
         private void ConfigureDataGridView()
@@ -72,7 +85,7 @@ namespace GPU_Prices_Parser
             
             if (productParser != null)
             {
-                var gpuInfo = productParser.ParseAllInfo(gpuName.Text, document);
+                var gpuInfo = productParser.ParseAllInfo(GpuModelHelper.Parse((string) gpuList.SelectedItem), document);
                 var tasks = gpuInfo.Select(info =>
                     Task.Run(() => FileSaver.SaveDataAsync(info, Program.GpuDirPath, info.Gpu.FullName + info.DateStamp)));
             }
@@ -81,16 +94,16 @@ namespace GPU_Prices_Parser
             _lineSeries.Points.Add(new DataPoint(50, 50));
             plotView.Refresh();
             
-            gpuName.Enabled = true;
+            gpuList.Enabled = true;
         }
 
         private void RequestButtonClick(object sender, EventArgs e)
         {
-            if (gpuName.Text.Length == 0)
-            {
-                MessageBox.Show("Input line is empty..."); 
-                return;
-            }
+            // if (gpuName.Text.Length == 0)
+            // {
+            //     MessageBox.Show("Input line is empty..."); 
+            //     return;
+            // }
             
             // if (!_filter.IsMatchRegex(gpuName.Text))
             // {
@@ -98,9 +111,9 @@ namespace GPU_Prices_Parser
             //     return;
             // }
             
-            gpuName.Enabled = false;
+            gpuList.Enabled = false;
             
-            plotView.Model.Title = gpuName.Text + " Prices";
+            plotView.Model.Title = (string) gpuList.SelectedItem + " Prices";
             plotView.Refresh();
 
             foreach (var store in _storesToSearch)

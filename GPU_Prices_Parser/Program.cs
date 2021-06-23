@@ -29,7 +29,11 @@ namespace GPU_Prices_Parser
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new GpuForm(stores,
+            Application.Run(new GpuForm(new[]
+                {
+                    GpuModel.Rtx_3060, GpuModel.Rtx_3060_ti, GpuModel.Rtx_3070, 
+                    GpuModel.Rtx_3070_ti, GpuModel.Rtx_3080, GpuModel.Rtx_3090
+                }, stores,
                 new IProductParser[]
                     {new CitilinkProductParser(), new DnsProductParser(), new KotofotoProductParser()}, new Filter()));
         }
@@ -56,11 +60,11 @@ namespace GPU_Prices_Parser
 
             var files = Directory.GetFiles(StoreDirPath);
             if (files.Length == 0) return false;
-            
+
             notes = new GpuNote[files.Length];
-            for (int i = 0; i < files.Length; i++) 
+            for (int i = 0; i < files.Length; i++)
                 notes[i] = FileParser.ParseGpuFile(files[i]);
-            
+
             return true;
         }
     }
