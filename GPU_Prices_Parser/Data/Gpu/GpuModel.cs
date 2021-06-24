@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using GPU_Prices_Parser.Extensions;
 
 namespace GPU_Prices_Parser.Data.Gpu
 {
@@ -18,28 +16,31 @@ namespace GPU_Prices_Parser.Data.Gpu
 
     internal static class GpuModelHelper
     {
-        private static readonly Dictionary<GpuModel, string> Representations = new Dictionary<GpuModel, string>
+        private static readonly Dictionary<GpuModel, string> Representations;
+        private static readonly Dictionary<string, GpuModel> Models;
+
+        static GpuModelHelper()
         {
-            {GpuModel.Rtx_2060, "RTX 2060"},
-            {GpuModel.Rtx_3060, "RTX 3060"},
-            {GpuModel.Rtx_3060_ti, "RTX 3060 ti"},
-            {GpuModel.Rtx_3070, "RTX 3070"},
-            {GpuModel.Rtx_3070_ti, "RTX 3070 ti"},
-            {GpuModel.Rtx_3080, "RTX 3080"},
-            {GpuModel.Rtx_3090, "RTX 3090"}
-        };
-
-        public static string GetRepresentation(GpuModel model) => Representations[model];
-
-        public static GpuModel Parse(string value)
-        {
-            var newValue = value.Capitalize().Replace(' ', '_');
-            if (Enum.TryParse(newValue, out GpuModel result))
-                return result;
-
-            throw new ArgumentException($"String {value} can't parse to GpuModel type");
+            Representations = new Dictionary<GpuModel, string>
+            {
+                {GpuModel.Rtx_2060, "RTX 2060"},
+                {GpuModel.Rtx_3060, "RTX 3060"},
+                {GpuModel.Rtx_3060_ti, "RTX 3060 ti"},
+                {GpuModel.Rtx_3070, "RTX 3070"},
+                {GpuModel.Rtx_3070_ti, "RTX 3070 ti"},
+                {GpuModel.Rtx_3080, "RTX 3080"},
+                {GpuModel.Rtx_3090, "RTX 3090"}
+            };
+            
+            Models = Representations
+                .Select(pair => new KeyValuePair<string, GpuModel>(pair.Value, pair.Key))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
         }
-
+        
+        public static string GetRepresentation(GpuModel model) => Representations[model];
+        
+        public static GpuModel GetModel(string representation) => Models[representation];
+        
         public static GpuModel[] GetModelList() => Representations.Select(pair => pair.Key).ToArray();
     }
 }

@@ -91,7 +91,7 @@ namespace GPU_Prices_Parser
                 {
                     pricesTable.Enabled = true;
                     pricesTable.RowCount = gpuNotes.Length;
-                    
+
                     for (int i = 1; i < pricesTable.RowCount; i++)
                     {
                         pricesTable.Rows[i].HeaderCell.Value = gpuNotes[i].Gpu.FullName;
@@ -107,15 +107,16 @@ namespace GPU_Prices_Parser
 
             if (productParser != null)
             {
-                var gpuModel = GpuModelHelper.Parse((string) gpuList.SelectedItem);
+                var gpuModel = GpuModelHelper.GetModel((string) gpuList.SelectedItem);
                 var gpuInfo = productParser.ExtractAllInfo(gpuModel, document);
 
                 FillDataGridView(store, gpuInfo);
-                
+
                 Parallel.ForEach(gpuInfo, async info =>
                 {
-                    var saveFolderPath = Path.Combine(Program.GpuDirPath, 
-                        GpuModelHelper.GetRepresentation(info.Gpu.Model), info.Gpu.CellingStore.ToString());
+                    var saveFolderPath = Path.Combine(Program.GpuDirPath,
+                        GpuModelHelper.GetRepresentation(info.Gpu.Model), info.Gpu.CellingStore.ToString(),
+                        info.DateStamp.ToShortDateString());
                     await FileSaver.SaveDataAsync(info, saveFolderPath, info.ToString());
                 });
             }
@@ -132,7 +133,7 @@ namespace GPU_Prices_Parser
             gpuList.Enabled = false;
             pricesTable.RowCount = 0;
             pricesTable.Enabled = false;
-            
+
             plotView.Model.Title = (string) gpuList.SelectedItem + " Prices";
             plotView.Refresh();
 
