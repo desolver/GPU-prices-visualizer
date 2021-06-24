@@ -166,7 +166,7 @@ namespace GPU_Prices_Parser
                     for (int i = pricesTable.RowCount - gpuNotes.Length; i < pricesTable.RowCount; i++)
                     {
                         pricesTable.Rows[i].HeaderCell.Value = gpuNotes[j].Gpu.FullName;
-                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[j].Gpu.Model;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[j].Gpu.SerialNumber;
                         pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[j].Gpu.Price;
                         j++;
                     }
@@ -179,7 +179,7 @@ namespace GPU_Prices_Parser
                     for (int i = 0; i < pricesTable.RowCount; i++)
                     {
                         pricesTable.Rows[i].HeaderCell.Value = gpuNotes[i].Gpu.FullName;
-                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[i].Gpu.Model;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[i].Gpu.SerialNumber;
                         pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[i].Gpu.Price;
                     }
                 }
