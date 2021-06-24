@@ -7,8 +7,10 @@ using System.Windows.Forms;
 using AngleSharp.Dom;
 using GPU_Prices_Parser.Data;
 using GPU_Prices_Parser.Data.Gpu;
+using GPU_Prices_Parser.Extensions;
 using GPU_Prices_Parser.Parsers.Products;
 using OxyPlot;
+using OxyPlot.Axes;
 using OxyPlot.Series;
 
 namespace GPU_Prices_Parser
@@ -18,11 +20,6 @@ namespace GPU_Prices_Parser
         private readonly IEnumerable<IProductParser> _productParsers;
         private readonly Store[] _storesToSearch;
         private readonly WebProvider _webProvider;
-        private readonly LineSeries _lineSeries;
-
-        public GpuForm()
-        {
-        }
 
         public GpuForm(GpuModel[] gpuModelToSearch, Store[] storesToSearch, IEnumerable<IProductParser> productParsers)
         {
@@ -32,28 +29,58 @@ namespace GPU_Prices_Parser
             _storesToSearch = storesToSearch;
             _productParsers = productParsers;
 
-            var pm = new PlotModel
-            {
-                Title = "GPU Prices",
-                Subtitle = "Amazing GPU prices in different stores",
-                PlotType = PlotType.Cartesian,
-                Background = OxyColors.White,
-                IsLegendVisible = true
-            };
-
-            _lineSeries = new LineSeries();
-            pm.Series.Add(_lineSeries);
-            plotView.Model = pm;
-
             foreach (var store in _storesToSearch)
                 storeList.Items.Add(store.ToString()!);
 
             _webProvider.DownloadCompleted += OnDownloadComplete;
 
+            ConfigurePlotView();
             ConfigureDataGridView();
             ConfigureComboBox(gpuModelToSearch
                 .Select(model => (object) GpuModelHelper.GetRepresentation(model))
                 .ToArray());
+        }
+
+        private void ConfigurePlotView()
+        {
+            var model = new PlotModel
+            {
+                Title = "GPU Prices",
+                Subtitle = "Amazing GPU prices in different stores",
+                PlotType = PlotType.XY,
+                Background = OxyColors.White,
+                IsLegendVisible = true
+            };
+
+            var startDate = DateTime.Now.AddDays(-10);
+            var endDate = DateTime.Now;
+
+            var minValue = DateTimeAxis.ToDouble(startDate);
+            var maxValue = DateTimeAxis.ToDouble(endDate);
+
+            model.Axes.Add(new DateTimeAxis
+            {
+                Position = AxisPosition.Bottom,
+                Minimum = minValue, Maximum = maxValue,
+                IntervalType = DateTimeIntervalType.Days,
+                MajorStep = 1,
+                TitleColor = OxyColors.DarkRed,
+                TextColor = OxyColors.Green,
+                StringFormat = "dd/MMM",
+                Title = "Date"
+            });
+
+            model.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Minimum = 10000, Maximum = 100000,
+                Title = "Price",
+                MinorStep = 1000,
+                TitleColor = OxyColors.DarkRed,
+                TextColor = OxyColors.DarkOrange
+            });
+
+            plotView.Model = model;
         }
 
         private void ConfigureComboBox(object[] gpuToSearch)
@@ -65,40 +92,13 @@ namespace GPU_Prices_Parser
 
         private void ConfigureDataGridView()
         {
-            pricesTable.ColumnCount = _storesToSearch.Length;
+            pricesTable.ColumnCount = _storesToSearch.Length + 1;
             pricesTable.TopLeftHeaderCell.Value = "GPU Name";
 
-            for (int i = 0; i < _storesToSearch.Length; i++)
-                pricesTable.Columns[i].HeaderText = _storesToSearch[i].Name.ToString();
-        }
+            pricesTable.Columns[0].Visible = false;
 
-        private void FillDataGridView(Store store, GpuNote[] gpuNotes)
-        {
-            lock (pricesTable)
-            {
-                if (pricesTable.Enabled)
-                {
-                    pricesTable.RowCount += gpuNotes.Length;
-                    int j = 0;
-                    for (int i = pricesTable.RowCount - gpuNotes.Length; i < pricesTable.RowCount; i++)
-                    {
-                        pricesTable.Rows[i].HeaderCell.Value = gpuNotes[j].Gpu.FullName;
-                        pricesTable[store.Name.ToString(), i].Value = gpuNotes[j].Gpu.Price;
-                        j++;
-                    }
-                }
-                else
-                {
-                    pricesTable.Enabled = true;
-                    pricesTable.RowCount = gpuNotes.Length;
-
-                    for (int i = 1; i < pricesTable.RowCount; i++)
-                    {
-                        pricesTable.Rows[i].HeaderCell.Value = gpuNotes[i].Gpu.FullName;
-                        pricesTable[store.Name.ToString(), i].Value = gpuNotes[i].Gpu.Price;
-                    }
-                }
-            }
+            for (int i = 1; i < _storesToSearch.Length + 1; i++)
+                pricesTable.Columns[i].HeaderText = _storesToSearch[i - 1].Name.ToString();
         }
 
         private void OnDownloadComplete(Store store, IDocument document)
@@ -110,7 +110,7 @@ namespace GPU_Prices_Parser
                 var gpuModel = GpuModelHelper.GetModel((string) gpuList.SelectedItem);
                 var gpuInfo = productParser.ExtractAllInfo(gpuModel, document);
 
-                FillDataGridView(store, gpuInfo);
+                FillDataGridView(_storesToSearch.IndexOf(store), gpuInfo);
 
                 Parallel.ForEach(gpuInfo, async info =>
                 {
@@ -122,15 +122,12 @@ namespace GPU_Prices_Parser
             }
             else throw new ArgumentException($"There is no corresponding parser for the store {store.Name}");
 
-            _lineSeries.Points.Add(new DataPoint(50, 50));
-            plotView.Refresh();
-
-            gpuList.Enabled = true;
+            sendRequestBtn.Enabled = true;
         }
 
         private void RequestButtonClick(object sender, EventArgs e)
         {
-            gpuList.Enabled = false;
+            sendRequestBtn.Enabled = false;
             pricesTable.RowCount = 0;
             pricesTable.Enabled = false;
 
@@ -144,7 +141,49 @@ namespace GPU_Prices_Parser
 
         private void PricesTable_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // индекс левых хэдеров -1, верхних хэдеров -1
+            if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
+
+            plotView.Model.Subtitle = (string) pricesTable.Rows[e.RowIndex].HeaderCell.Value;
+            plotView.Model.Series.Clear();
+
+            var lineSeries = new LineSeries {Title = "Citilink"};
+            lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(DateTime.Today), 50000));
+            lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(new DateTime(2021, 6, 22)), 30000));
+            plotView.Model.Series.Add(lineSeries);
+            
+            plotView.Model.InvalidatePlot(true);
+        }
+
+        private void FillDataGridView(int storeIndex, GpuNote[] gpuNotes)
+        {
+            lock (pricesTable)
+            {
+                if (pricesTable.Enabled)
+                {
+                    pricesTable.Rows.Add(gpuNotes.Length);
+
+                    int j = 0;
+                    for (int i = pricesTable.RowCount - gpuNotes.Length; i < pricesTable.RowCount; i++)
+                    {
+                        pricesTable.Rows[i].HeaderCell.Value = gpuNotes[j].Gpu.FullName;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[j].Gpu.Model;
+                        pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[j].Gpu.Price;
+                        j++;
+                    }
+                }
+                else
+                {
+                    pricesTable.Enabled = true;
+                    pricesTable.RowCount = gpuNotes.Length;
+
+                    for (int i = 0; i < pricesTable.RowCount; i++)
+                    {
+                        pricesTable.Rows[i].HeaderCell.Value = gpuNotes[i].Gpu.FullName;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[i].Gpu.Model;
+                        pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[i].Gpu.Price;
+                    }
+                }
+            }
         }
     }
 }

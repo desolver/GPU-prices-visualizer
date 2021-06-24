@@ -1,3 +1,5 @@
+using System;
+
 namespace GPU_Prices_Parser.Data
 {
     internal class Store
@@ -12,5 +14,18 @@ namespace GPU_Prices_Parser.Data
         }
 
         public override string ToString() => Name.ToString();
+
+        public override bool Equals(object other)
+        {
+            if (!(other is Store otherStore))
+                return false;
+
+            return Name == otherStore.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine((int) Name, Urls);
+        }
     }
 }

@@ -28,8 +28,9 @@ namespace GPU_Prices_Parser.Parsers.Products
                 var element = cells[i];
                 var priceCell = element.QuerySelector(priceSelector)?.TextContent;
                 var nameCell = element.QuerySelector(nameSelector)?.TextContent;
-
-                result[i] = new GpuNote(new Gpu(model, nameCell, decimal.Parse(priceCell!), StoreName.Citilink), DateTime.Now);
+                var serialNumber = nameCell.Split(',')[1].TrimStart(' ');
+                
+                result[i] = new GpuNote(new Gpu(model, nameCell, serialNumber,decimal.Parse(priceCell!), StoreName.Citilink), DateTime.Now);
             }
 
             return result;

@@ -98,7 +98,7 @@ namespace GPU_Prices_Parser
             // 
             this.storesGroupBox.Controls.Add(this.storeList);
             this.storesGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.storesGroupBox.Location = new System.Drawing.Point(806, 301);
+            this.storesGroupBox.Location = new System.Drawing.Point(806, 292);
             this.storesGroupBox.Name = "storesGroupBox";
             this.storesGroupBox.Size = new System.Drawing.Size(207, 128);
             this.storesGroupBox.TabIndex = 6;
