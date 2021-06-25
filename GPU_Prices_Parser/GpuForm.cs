@@ -125,7 +125,7 @@ namespace GPU_Prices_Parser
             sendRequestBtn.Enabled = true;
         }
 
-        private void RequestButtonClick(object sender, EventArgs e)
+        private async Task RequestButtonClick(object sender, EventArgs e)
         {
             sendRequestBtn.Enabled = false;
             pricesTable.RowCount = 0;
@@ -136,21 +136,33 @@ namespace GPU_Prices_Parser
 
             foreach (var store in _storesToSearch)
             foreach (var url in store.Urls)
-                _webProvider.SendRequest(url, store);
+                await _webProvider.SendRequest(url, store);
         }
 
-        private void PricesTable_CellClick(object sender, DataGridViewCellEventArgs e)
+        private async Task PricesTable_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex < 0 || e.RowIndex < 0) return;
 
             plotView.Model.Subtitle = (string) pricesTable.Rows[e.RowIndex].HeaderCell.Value;
             plotView.Model.Series.Clear();
 
-            var lineSeries = new LineSeries {Title = "Citilink"};
-            lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(DateTime.Today), 50000));
-            lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(new DateTime(2021, 6, 22)), 30000));
-            plotView.Model.Series.Add(lineSeries);
-            
+            foreach (var store in _storesToSearch)
+            {
+                var selectedGpu = (GpuNote) pricesTable[0, e.RowIndex].Value;
+                var lineSeries = new LineSeries {Title = store.ToString()};
+                
+                var otherGpus = await SimilarGpuFilesReader.Find(
+                    selectedGpu.Gpu.SerialNumber,
+                    Path.Combine(Program.GpuDirPath,
+                        GpuModelHelper.GetRepresentation(selectedGpu.Gpu.Model),
+                        store.ToString()));
+
+                foreach (var gpu in otherGpus)
+                    lineSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(gpu.DateStamp.Date), (double) gpu.Gpu.Price));
+
+                plotView.Model.Series.Add(lineSeries); 
+            }
+
             plotView.Model.InvalidatePlot(true);
         }
 
@@ -166,7 +178,7 @@ namespace GPU_Prices_Parser
                     for (int i = pricesTable.RowCount - gpuNotes.Length; i < pricesTable.RowCount; i++)
                     {
                         pricesTable.Rows[i].HeaderCell.Value = gpuNotes[j].Gpu.FullName;
-                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[j].Gpu.SerialNumber;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[j];
                         pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[j].Gpu.Price;
                         j++;
                     }
@@ -179,7 +191,7 @@ namespace GPU_Prices_Parser
                     for (int i = 0; i < pricesTable.RowCount; i++)
                     {
                         pricesTable.Rows[i].HeaderCell.Value = gpuNotes[i].Gpu.FullName;
-                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[i].Gpu.SerialNumber;
+                        pricesTable.Rows[i].Cells[0].Value = gpuNotes[i];
                         pricesTable.Rows[i].Cells[storeIndex + 1].Value = gpuNotes[i].Gpu.Price;
                     }
                 }

@@ -1,8 +1,5 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using GPU_Prices_Parser.Data;
 using GPU_Prices_Parser.Data.Gpu;
 using GPU_Prices_Parser.Parsers.Files;
 using GPU_Prices_Parser.Parsers.Products;
@@ -20,10 +17,7 @@ namespace GPU_Prices_Parser
         [STAThread]
         private static void Main()
         {
-            var stores = ParseStoreFiles();
-            if (TryParseGpuFiles(out var gpuNotes))
-            {
-            }
+            var stores = FileParser.ParseStoreFiles(StoreDirPath);
 
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
@@ -32,36 +26,6 @@ namespace GPU_Prices_Parser
             Application.Run(new GpuForm(GpuModelHelper.GetModelList(), stores,
                 new IProductParser[]
                     {new CitilinkProductParser(), new DnsProductParser(), new KotofotoProductParser()}));
-        }
-
-        private static Store[] ParseStoreFiles()
-        {
-            if (!Directory.Exists(StoreDirPath))
-                throw new IOException("Directory with store data doesn't exist");
-
-            var files = Directory.GetFiles(StoreDirPath).Where(file => file.Contains("Citilink")).ToArray();
-            var stores = new Store[files.Length];
-
-            for (int i = 0; i < files.Length; i++)
-                stores[i] = FileParser.ParseStoreFile(files[i]);
-
-            return stores;
-        }
-
-        private static bool TryParseGpuFiles(out GpuNote[] notes)
-        {
-            notes = null;
-            if (!Directory.Exists(GpuDirPath))
-                return false;
-
-            var files = Directory.GetFiles(GpuDirPath);
-            if (files.Length == 0) return false;
-
-            notes = new GpuNote[files.Length];
-            for (int i = 0; i < files.Length; i++)
-                notes[i] = FileParser.ParseGpuFile(files[i]);
-
-            return true;
         }
     }
 }

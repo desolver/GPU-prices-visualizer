@@ -71,7 +71,8 @@ namespace GPU_Prices_Parser
             this.sendRequestBtn.TabIndex = 3;
             this.sendRequestBtn.Text = "Find information";
             this.sendRequestBtn.UseVisualStyleBackColor = true;
-            this.sendRequestBtn.Click += new System.EventHandler(this.RequestButtonClick);
+            this.sendRequestBtn.Click += new System.EventHandler(
+                async (sender, obj) => await this.RequestButtonClick(sender, obj));
             // 
             // gpuGroupBox
             // 
@@ -119,7 +120,8 @@ namespace GPU_Prices_Parser
             this.pricesTable.RowTemplate.Height = 25;
             this.pricesTable.Size = new System.Drawing.Size(776, 271);
             this.pricesTable.TabIndex = 8;
-            this.pricesTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.PricesTable_CellClick);
+            this.pricesTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(
+                async (sender, obj) => await this.PricesTable_CellClick(sender, obj));
             // 
             // GpuForm
             // 
