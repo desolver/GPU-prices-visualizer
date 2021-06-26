@@ -1,39 +1,34 @@
 ﻿using System;
-using System.Linq;
+using System.Threading.Tasks;
 using AngleSharp.Dom;
 using GPU_Prices_Parser.Data;
 using GPU_Prices_Parser.Data.Gpu;
 
 namespace GPU_Prices_Parser.Parsers.Products
 {
-    internal class CitilinkProductParser : IProductParser
+    internal class CitilinkProductParser : ProductParser
     {
-        public StoreName ParseStore => StoreName.Citilink;
-        
-        public GpuNote[] ExtractAllInfo(GpuModel model, IDocument document)
+        public override StoreName ParseStore => StoreName.Citilink;
+        protected override string CellSelector => "div.ProductCardHorizontal";
+        protected override string PriceSelector => "span.ProductCardHorizontal__price_current-price";
+        protected override string NameSelector => "a.ProductCardHorizontal__title";
+
+        public CitilinkProductParser(WebProvider webProvider) : base(webProvider) { }
+
+        protected override async Task<IDocument> GetHtmlDocument(string url) =>
+            await WebProvider.GetHtmlWithAngleSharp(url);
+
+        protected override GpuNote ParseCell(GpuModel model, IElement cell)
         {
-            var cellSelector = "div.ProductCardHorizontal";
-            var cells = document
-                .QuerySelectorAll(cellSelector)
-                .Where(element => element.TextContent.Contains(GpuModelHelper.GetRepresentation(model)))
-                .ToArray();
-            
-            var result = new GpuNote[cells.Length];
+            var priceSelector = PriceSelector;
+            var nameSelector = NameSelector;
 
-            var priceSelector = "span.ProductCardHorizontal__price_current-price";
-            var nameSelector = "a.ProductCardHorizontal__title";
+            var priceCell = cell.QuerySelector(priceSelector)?.TextContent;
+            var nameCell = cell.QuerySelector(nameSelector)?.TextContent;
+            var serialNumber = nameCell!.Split(',')[1].TrimStart(' ');
 
-            for (int i = 0; i < result.Length; i++)
-            {
-                var element = cells[i];
-                var priceCell = element.QuerySelector(priceSelector)?.TextContent;
-                var nameCell = element.QuerySelector(nameSelector)?.TextContent;
-                var serialNumber = nameCell.Split(',')[1].TrimStart(' ');
-                
-                result[i] = new GpuNote(new Gpu(model, nameCell, serialNumber,decimal.Parse(priceCell!), StoreName.Citilink), DateTime.Now);
-            }
-
-            return result;
+            return new GpuNote(new Gpu(model, nameCell, serialNumber,
+                decimal.Parse(priceCell!), ParseStore), DateTime.Now);
         }
     }
 }

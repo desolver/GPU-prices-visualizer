@@ -18,14 +18,15 @@ namespace GPU_Prices_Parser
         private static void Main()
         {
             var stores = FileParser.ParseStoreFiles(StoreDirPath);
-
+            var webProvider = new WebProvider();
+            
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
             Application.Run(new GpuForm(GpuModelHelper.GetModelList(), stores,
-                new IProductParser[]
-                    {new CitilinkProductParser(), new DnsProductParser(), new KotofotoProductParser()}));
+                new ProductParser[]
+                    {new CitilinkProductParser(webProvider), new DnsProductParser(webProvider)}));
         }
     }
 }

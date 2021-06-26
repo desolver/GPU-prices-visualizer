@@ -9,6 +9,7 @@ using GPU_Prices_Parser.Data;
 using GPU_Prices_Parser.Data.Gpu;
 using GPU_Prices_Parser.Extensions;
 using GPU_Prices_Parser.Parsers.Products;
+using OpenQA.Selenium;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -17,11 +18,11 @@ namespace GPU_Prices_Parser
 {
     internal partial class GpuForm : Form
     {
-        private readonly IEnumerable<IProductParser> _productParsers;
+        private readonly IEnumerable<ProductParser> _productParsers;
         private readonly Store[] _storesToSearch;
         private readonly WebProvider _webProvider;
 
-        public GpuForm(GpuModel[] gpuModelToSearch, Store[] storesToSearch, IEnumerable<IProductParser> productParsers)
+        public GpuForm(GpuModel[] gpuModelToSearch, Store[] storesToSearch, IEnumerable<ProductParser> productParsers)
         {
             InitializeComponent();
 
@@ -31,8 +32,6 @@ namespace GPU_Prices_Parser
 
             foreach (var store in _storesToSearch)
                 storeList.Items.Add(store.ToString()!);
-
-            _webProvider.DownloadCompleted += OnDownloadComplete;
 
             ConfigurePlotView();
             ConfigureDataGridView();
@@ -101,33 +100,10 @@ namespace GPU_Prices_Parser
                 pricesTable.Columns[i].HeaderText = _storesToSearch[i - 1].Name.ToString();
         }
 
-        private void OnDownloadComplete(Store store, IDocument document)
-        {
-            var productParser = _productParsers.FirstOrDefault(parser => parser.ParseStore == store.Name);
-
-            if (productParser != null)
-            {
-                var gpuModel = GpuModelHelper.GetModel((string) gpuList.SelectedItem);
-                var gpuInfo = productParser.ExtractAllInfo(gpuModel, document);
-
-                FillDataGridView(_storesToSearch.IndexOf(store), gpuInfo);
-
-                Parallel.ForEach(gpuInfo, async info =>
-                {
-                    var saveFolderPath = Path.Combine(Program.GpuDirPath,
-                        GpuModelHelper.GetRepresentation(info.Gpu.Model), info.Gpu.CellingStore.ToString(),
-                        info.DateStamp.ToShortDateString());
-                    await FileSaver.SaveDataAsync(info, saveFolderPath, info.ToString());
-                });
-            }
-            else throw new ArgumentException($"There is no corresponding parser for the store {store.Name}");
-
-            sendRequestBtn.Enabled = true;
-        }
-
         private async Task RequestButtonClick(object sender, EventArgs e)
         {
             sendRequestBtn.Enabled = false;
+            
             pricesTable.RowCount = 0;
             pricesTable.Enabled = false;
 
@@ -135,8 +111,21 @@ namespace GPU_Prices_Parser
             plotView.Refresh();
 
             foreach (var store in _storesToSearch)
-            foreach (var url in store.Urls)
-                await _webProvider.SendRequest(url, store);
+            {
+                var productParser = _productParsers.FirstOrDefault(parser => parser.ParseStore == store.Name);
+                
+                if (productParser != null)
+                {
+                    var gpuInfo = await productParser!.ExtractAllInfo(
+                            GpuModelHelper.GetModel((string) gpuList.SelectedItem), store);
+                    
+                    FillDataGridView(_storesToSearch.IndexOf(store), gpuInfo);
+                    FileSaver.SaveGpuInfo(gpuInfo);
+                }
+                else throw new ArgumentException($"There is no corresponding parser for the store {store.Name}");
+            }
+            
+            sendRequestBtn.Enabled = true;
         }
 
         private async Task PricesTable_CellClick(object sender, DataGridViewCellEventArgs e)

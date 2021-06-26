@@ -15,7 +15,7 @@ namespace GPU_Prices_Parser.Parsers.Files
             if (!Directory.Exists(storeDirPath))
                 throw new IOException("Directory with store data doesn't exist");
 
-            var files = Directory.GetFiles(storeDirPath).Where(file => file.Contains("Citilink")).ToArray();
+            var files = Directory.GetFiles(storeDirPath).Where(file => file.Contains("DNS")).ToArray();
             var stores = new Store[files.Length];
 
             for (int i = 0; i < files.Length; i++)

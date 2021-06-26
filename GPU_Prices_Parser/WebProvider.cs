@@ -1,24 +1,27 @@
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
-using GPU_Prices_Parser.Data;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace GPU_Prices_Parser
 {
     internal class WebProvider
     {
-        public event DownloadComplete DownloadCompleted;
-        public delegate void DownloadComplete(Store store, IDocument document);
-
-        public async Task SendRequest(string url, Store store)
+        public async Task<IDocument> GetHtmlWithAngleSharp(string url)
         {
-            //var client = new WebClient();
-            //client.DownloadStringAsync(new Uri(url));
-            //client.DownloadStringCompleted += (sender, args) => DownloadCompleted?.Invoke(store, args.Result);
-            
             var context = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
             var document = await context.OpenAsync(url);
-            DownloadCompleted?.Invoke(store, document);
+            return document;
+        }
+
+        public async Task<string> GetHtmlWithSelenium(string url)
+        {
+            using var webDriver = new ChromeDriver();
+            await Task.Run(() => webDriver.Navigate().GoToUrl(url));
+            var document = webDriver.PageSource;
+            webDriver.Quit();
+            return document;
         }
     }
 }
