@@ -14,7 +14,7 @@ namespace GPU_Prices_Parser.Parsers.Products
 
         public KotofotoProductParser(WebProvider webProvider) : base(webProvider) { }
 
-        protected override Task<IDocument> GetHtmlDocument(string url)
+        protected override Task<IDocument> GetHtmlDocument(Store store, string url)
         {
             throw new System.NotImplementedException();
         }

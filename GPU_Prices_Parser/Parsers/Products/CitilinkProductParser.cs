@@ -15,7 +15,7 @@ namespace GPU_Prices_Parser.Parsers.Products
 
         public CitilinkProductParser(WebProvider webProvider) : base(webProvider) { }
 
-        protected override async Task<IDocument> GetHtmlDocument(string url) =>
+        protected override async Task<IDocument> GetHtmlDocument(Store store, string url) =>
             await WebProvider.GetHtmlWithAngleSharp(url);
 
         protected override GpuNote ParseCell(GpuModel model, IElement cell)

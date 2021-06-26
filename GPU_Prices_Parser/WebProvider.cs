@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
 namespace GPU_Prices_Parser
@@ -17,11 +16,14 @@ namespace GPU_Prices_Parser
 
         public async Task<string> GetHtmlWithSelenium(string url)
         {
-            using var webDriver = new ChromeDriver();
             await Task.Run(() => webDriver.Navigate().GoToUrl(url));
             var document = webDriver.PageSource;
-            webDriver.Quit();
             return document;
         }
+
+        private ChromeDriver webDriver;
+        
+        public void OpenBrowser() => webDriver = new ChromeDriver();
+        public void CloseBrowser() => webDriver.Quit();
     }
 }

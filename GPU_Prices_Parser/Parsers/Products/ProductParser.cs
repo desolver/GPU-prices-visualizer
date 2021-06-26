@@ -20,7 +20,7 @@ namespace GPU_Prices_Parser.Parsers.Products
         
         protected ProductParser(WebProvider webProvider) => WebProvider = webProvider;
         
-        protected abstract Task<IDocument> GetHtmlDocument(string url);
+        protected abstract Task<IDocument> GetHtmlDocument(Store store, string url);
         protected abstract GpuNote ParseCell(GpuModel model, IElement cell);
         
         public async Task<GpuNote[]> ExtractAllInfo(GpuModel model, Store store)
@@ -31,7 +31,7 @@ namespace GPU_Prices_Parser.Parsers.Products
             var storeGpu = new List<GpuNote>();
             foreach (var url in store.Urls)
             {
-                var document = await GetHtmlDocument(url);
+                var document = await GetHtmlDocument(store, url);
                 
                 var cellSelector = CellSelector;
                 var cells = document
