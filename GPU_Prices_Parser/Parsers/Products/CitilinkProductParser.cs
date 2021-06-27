@@ -20,15 +20,14 @@ namespace GPU_Prices_Parser.Parsers.Products
 
         protected override GpuNote ParseCell(GpuModel model, IElement cell)
         {
-            var priceSelector = PriceSelector;
-            var nameSelector = NameSelector;
+            var price = cell.QuerySelector(PriceSelector)?.TextContent;
+            var fullName = cell.QuerySelector(NameSelector)?.TextContent;
+            var nameAndSNumber = fullName!.Split(',');
+            var name = nameAndSNumber[0].TrimEnd(' ');
+            var serialNumber = nameAndSNumber[1].TrimStart(' ');
 
-            var priceCell = cell.QuerySelector(priceSelector)?.TextContent;
-            var nameCell = cell.QuerySelector(nameSelector)?.TextContent;
-            var serialNumber = nameCell!.Split(',')[1].TrimStart(' ');
-
-            return new GpuNote(new Gpu(model, nameCell, serialNumber,
-                decimal.Parse(priceCell!), ParseStore), DateTime.Now);
+            return new GpuNote(new Gpu(model, name, fullName, serialNumber,
+                decimal.Parse(price ?? "0"), ParseStore), DateTime.Now);
         }
     }
 }

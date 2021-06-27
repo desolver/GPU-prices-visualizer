@@ -38,34 +38,39 @@ namespace GPU_Prices_Parser.Parsers.Products
 
         protected override GpuNote ParseCell(GpuModel model, IElement cell)
         {
-            var priceCell = cell.QuerySelector(PriceSelector)?.TextContent;
-            priceCell = priceCell!.Substring(0, priceCell.Length - 2);
+            var price = cell.QuerySelector(PriceSelector)?.TextContent;
+            price = price!.Substring(0, price.Length - 2);
             
-            var nameCell = cell.QuerySelector(NameSelector)?.TextContent;
-            var serialNumber = GetSerialNumber(nameCell);
+            var fullname = cell.QuerySelector(NameSelector)?.TextContent;
+            var pair = GetNameAndSerialNumber(fullname);
 
-            return new GpuNote(new Gpu(model, nameCell, serialNumber,
-                decimal.Parse(priceCell!), ParseStore), DateTime.Now);
+            return new GpuNote(new Gpu(model, pair.Item1, fullname, pair.Item2,
+                decimal.Parse(price!), ParseStore), DateTime.Now);
         }
 
-        private static string GetSerialNumber(string header)
+        private static (string, string) GetNameAndSerialNumber(string header)
         {
-            var stringBuilder = new StringBuilder();
+            var nameStringBuilder = new StringBuilder();
+            var numberStringBuilder = new StringBuilder();
             for (int i = 0; i < header.Length; i++)
             {
-                if (header[i] != '[') continue;
+                if (header[i] != '[')
+                {
+                    nameStringBuilder.Append(header[i]);
+                    continue;
+                }
                 
                 i++;
                 while (header[i] != ']')
                 {
-                    stringBuilder.Append(header[i]);
+                    numberStringBuilder.Append(header[i]);
                     i++;
                 }
 
                 break;
             }
 
-            return stringBuilder.ToString();
+            return (nameStringBuilder.ToString(), numberStringBuilder.ToString());
         }
     }
 }
