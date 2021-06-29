@@ -39,7 +39,7 @@ namespace GPU_Prices_Parser.Parsers.Products
         protected override GpuNote ParseCell(GpuModel model, IElement cell)
         {
             var price = cell.QuerySelector(PriceSelector)?.TextContent;
-            price = price!.Substring(0, price.Length - 2);
+            price = price == null ? "0" : price![..(price.Length - 2)];
             
             var fullname = cell.QuerySelector(NameSelector)?.TextContent;
             var pair = GetNameAndSerialNumber(fullname);

@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using GPU_Prices_Parser.Data;
 using GPU_Prices_Parser.Data.Gpu;
 using GPU_Prices_Parser.Extensions;
+using GPU_Prices_Parser.Parsers.Files;
 using GPU_Prices_Parser.Parsers.Products;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -101,10 +102,9 @@ namespace GPU_Prices_Parser
 
         private async Task RequestButtonClick(object sender, EventArgs e)
         {
-            sendRequestBtn.Enabled = false;
-            
             pricesTable.RowCount = 0;
-            pricesTable.Enabled = false;
+            SetEnabledControls(false);
+
             _gpuInTable.Clear();
             
             plotView.Model.Title = (string) gpuList.SelectedItem + " Prices";
@@ -124,9 +124,33 @@ namespace GPU_Prices_Parser
                 }
                 else throw new ArgumentException($"There is no corresponding parser for the store {store.Name}");
             }
+
+            SetEnabledControls(true);
+        }
+
+        private void LoadLocalData(object sender, EventArgs eventArgs)
+        {
+            SetEnabledControls(false);
+
+            var selectedGpu = GpuModelHelper.GetModel((string) gpuList.SelectedItem);
             
-            sendRequestBtn.Enabled = true;
-            pricesTable.Enabled = true;
+            foreach (var store in _storesToSearch)
+            {
+                var path = Path.Combine(Program.GpuDirPath, GpuModelHelper.GetRepresentation(selectedGpu), 
+                    store.ToString(), DateTime.Now.ToShortDateString());
+
+                try
+                {
+                    var info = FileParser.ParseGpuFiles(path);
+                    FillDataGridView(_storesToSearch.IndexOf(store) + 1, info);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show($"No such GPU info on your disk about {store}");
+                }
+            }
+            
+            SetEnabledControls(true);
         }
 
         private async Task PricesTable_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -157,6 +181,13 @@ namespace GPU_Prices_Parser
             plotView.Model.InvalidatePlot(true);
         }
 
+        private void SetEnabledControls(bool enable)
+        {
+            localDataBtn.Enabled = enable;
+            sendRequestBtn.Enabled = enable;
+            pricesTable.Enabled = enable;
+        }
+        
         private void FillDataGridView(int storeIndex, GpuNote[] gpuNotes)
         {
             if (pricesTable.Rows.Count == 0)

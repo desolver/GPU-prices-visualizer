@@ -33,6 +33,7 @@ namespace GPU_Prices_Parser
             this.plotView = new OxyPlot.WindowsForms.PlotView();
             this.sendRequestBtn = new System.Windows.Forms.Button();
             this.gpuGroupBox = new System.Windows.Forms.GroupBox();
+            this.localDataBtn = new System.Windows.Forms.Button();
             this.gpuList = new System.Windows.Forms.ComboBox();
             this.storesGroupBox = new System.Windows.Forms.GroupBox();
             this.pricesTable = new System.Windows.Forms.DataGridView();
@@ -65,26 +66,39 @@ namespace GPU_Prices_Parser
             // 
             // sendRequestBtn
             // 
+            this.sendRequestBtn.BackColor = System.Drawing.SystemColors.Menu;
             this.sendRequestBtn.Location = new System.Drawing.Point(5, 70);
             this.sendRequestBtn.Name = "sendRequestBtn";
             this.sendRequestBtn.Size = new System.Drawing.Size(195, 32);
             this.sendRequestBtn.TabIndex = 3;
             this.sendRequestBtn.Text = "Find information";
-            this.sendRequestBtn.UseVisualStyleBackColor = true;
+            this.sendRequestBtn.UseVisualStyleBackColor = false;
             this.sendRequestBtn.Click += new System.EventHandler(
-                async (sender, obj) => await this.RequestButtonClick(sender, obj));
+                            async (sender, obj) => await this.RequestButtonClick(sender, obj));
             // 
             // gpuGroupBox
             // 
+            this.gpuGroupBox.Controls.Add(this.localDataBtn);
             this.gpuGroupBox.Controls.Add(this.gpuList);
             this.gpuGroupBox.Controls.Add(this.sendRequestBtn);
             this.gpuGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.gpuGroupBox.Location = new System.Drawing.Point(806, 12);
             this.gpuGroupBox.Name = "gpuGroupBox";
-            this.gpuGroupBox.Size = new System.Drawing.Size(207, 116);
+            this.gpuGroupBox.Size = new System.Drawing.Size(207, 158);
             this.gpuGroupBox.TabIndex = 5;
             this.gpuGroupBox.TabStop = false;
             this.gpuGroupBox.Text = "GPU Model";
+            // 
+            // localDataBtn
+            // 
+            this.localDataBtn.BackColor = System.Drawing.SystemColors.Menu;
+            this.localDataBtn.Location = new System.Drawing.Point(5, 117);
+            this.localDataBtn.Name = "localDataBtn";
+            this.localDataBtn.Size = new System.Drawing.Size(194, 32);
+            this.localDataBtn.TabIndex = 9;
+            this.localDataBtn.Text = "Load local data";
+            this.localDataBtn.UseVisualStyleBackColor = false;
+            this.localDataBtn.Click += new System.EventHandler(this.LoadLocalData);
             // 
             // gpuList
             // 
@@ -150,6 +164,7 @@ namespace GPU_Prices_Parser
         private System.Windows.Forms.ListBox storeList;
         private System.Windows.Forms.DataGridView pricesTable;
         private System.Windows.Forms.ComboBox gpuList;
+        private System.Windows.Forms.Button localDataBtn;
     }
 }
 

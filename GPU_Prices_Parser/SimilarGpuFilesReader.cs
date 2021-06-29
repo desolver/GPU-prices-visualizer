@@ -21,7 +21,7 @@ namespace GPU_Prices_Parser
             return readTasks
                 .Select(task => task.Result)
                 .Where(fileContent => fileContent.Contains(serialNumber))
-                .Select(fileContent => (GpuNote) JsonConvert.DeserializeObject<GpuNote>(fileContent));
+                .Select(JsonConvert.DeserializeObject<GpuNote>);
         }
     }
 }

@@ -8,24 +8,24 @@ namespace GPU_Prices_Parser.Parsers.Files
 {
     internal static class FileParser
     {
-        public static GpuNote ParseGpuFile(string path) => Parse<GpuNote>(path);
+        public static GpuNote[] ParseGpuFiles(string path) => ParseFiles<GpuNote>(path);
+        
+        public static Store[] ParseStoreFiles(string storeDirPath) => ParseFiles<Store>(storeDirPath);
 
-        public static Store[] ParseStoreFiles(string storeDirPath)
+        private static T[] ParseFiles<T>(string path)
         {
-            if (!Directory.Exists(storeDirPath))
+            if (!Directory.Exists(path))
                 throw new IOException("Directory with store data doesn't exist");
-
-            var files = Directory.GetFiles(storeDirPath).Where(file => file.Contains("DNS") || file.Contains("Citilink")).ToArray();
-            var stores = new Store[files.Length];
-
+            
+            var files = Directory.GetFiles(path).ToArray();
+            var results = new T[files.Length];
+            
             for (int i = 0; i < files.Length; i++)
-                stores[i] = ParseStoreFile(files[i]);
+                results[i] = Parse<T>(files[i]);
 
-            return stores;
+            return results;
         }
-        
-        private static Store ParseStoreFile(string path) => Parse<Store>(path);
-        
+
         private static T Parse<T>(string path)
         {
             if (!File.Exists(path))
