@@ -7,9 +7,9 @@ namespace GPU_Prices_Parser.Data.Gpu
     {
         Rtx_2060,
         Rtx_3060,
-        Rtx_3060_ti,
+        //Rtx_3060_ti,
         Rtx_3070,
-        Rtx_3070_ti,
+        //Rtx_3070_ti,
         Rtx_3080,
         Rtx_3090
     }
@@ -25,9 +25,9 @@ namespace GPU_Prices_Parser.Data.Gpu
             {
                 {GpuModel.Rtx_2060, "RTX 2060"},
                 {GpuModel.Rtx_3060, "RTX 3060"},
-                {GpuModel.Rtx_3060_ti, "RTX 3060 ti"},
+                //{GpuModel.Rtx_3060_ti, "RTX 3060 ti"},
                 {GpuModel.Rtx_3070, "RTX 3070"},
-                {GpuModel.Rtx_3070_ti, "RTX 3070 ti"},
+                //{GpuModel.Rtx_3070_ti, "RTX 3070 ti"},
                 {GpuModel.Rtx_3080, "RTX 3080"},
                 {GpuModel.Rtx_3090, "RTX 3090"}
             };

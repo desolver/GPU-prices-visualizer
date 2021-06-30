@@ -17,6 +17,7 @@ namespace GPU_Prices_Parser
         public async Task<string> GetHtmlWithSelenium(string url)
         {
             await Task.Run(() => webDriver.Navigate().GoToUrl(url));
+            await Task.Delay(2000);
             var document = webDriver.PageSource;
             return document;
         }
